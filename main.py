@@ -1,13 +1,12 @@
 import os
 import requests
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-# Cria a ponte MCP
-mcp = FastMCP("Meu App do AI Studio")
+# Cria a ponte MCP com a versao atualizada
+mcp = MCPServer("Meu App do AI Studio")
 
-# Coloque as credenciais do seu app publicado
 APP_URL = "https://jogo-de-tabuleiro-com-dados.ai.studio"
-API_KEY = os.environ.get("AIzaSyALvrJvjKOGdCTa5BS8f3aCKrhfDjngffE")
+API_KEY = os.environ.get("AIzaSyALvrJvjKOGdCTa5BS8f3aCKrhfDjngffE", "")
 
 @mcp.tool()
 def perguntar_ao_meu_app(mensagem: str) -> str:
@@ -18,7 +17,6 @@ def perguntar_ao_meu_app(mensagem: str) -> str:
     }
     dados = {"prompt": mensagem}
     
-    # Faz a chamada para o seu aplicativo publicado
     resposta = requests.post(APP_URL, json=dados, headers=headers)
     
     if resposta.status_code == 200:
@@ -26,4 +24,6 @@ def perguntar_ao_meu_app(mensagem: str) -> str:
     return "Erro ao consultar o aplicativo."
 
 if __name__ == "__main__":
-    mcp.run()
+    # Inicia a ponte escutando a porta que o Render precisa
+    porta = int(os.environ.get("PORT", 8000))
+    mcp.run(transport="sse", host="0.0.0.0", port=porta)
